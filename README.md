@@ -54,7 +54,7 @@ Outputs are saved to `results/tables/` and `results/figures/`.
 We would like to thank **Greg Silsbe** for making the source code for his paper, 
 The CAFE model: A net production model for global
 ocean phytoplankton, publicly available. 
-Access to his [repository] (https://github.com/gsilsbe/CAFE) significantly eased the implementation of our model framework.
+Access to his repository (https://github.com/gsilsbe/CAFE) significantly eased the implementation of our model framework.
 
 
 ## References
