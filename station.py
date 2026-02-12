@@ -128,6 +128,8 @@ class Station:
         )
                  
     def a_phy(self):
+        # From Stæhr and Markager (2004)
+        
         # Define the wavelength range (10 nm resolution)
         wv = np.arange(400, 710, 10)
     
@@ -188,7 +190,7 @@ class Station:
 
 
     def par_wavelengths(self):
-        
+        # ASTMG173 reference Spectrum, found in Silsbe et al. 2016
         PARfraction = np.array([0.00227, 0.00218, 0.00239, 0.00189, 0.00297, 0.00348, 0.00345, 0.00344,
                             0.00373, 0.00377, 0.00362, 0.00364, 0.00360, 0.00367, 0.00354, 0.00368, 
                             0.00354, 0.00357, 0.00363, 0.00332, 0.00358, 0.00357, 0.00359, 0.00340, 
@@ -212,6 +214,8 @@ class Station:
         
 
     def kd_from_secchi(self):
+        # ASTMG173 reference Spectrum, found in Silsbe et al. 2016
+
         PARfraction = np.array([0.00227, 0.00218, 0.00239, 0.00189, 0.00297, 0.00348, 0.00345, 0.00344,
                             0.00373, 0.00377, 0.00362, 0.00364, 0.00360, 0.00367, 0.00354, 0.00368, 
                             0.00354, 0.00357, 0.00363, 0.00332, 0.00358, 0.00357, 0.00359, 0.00340, 
@@ -237,6 +241,8 @@ class Station:
             self.variables['zeu'] = {'value': zeu if zeu > 0 else np.nan, 'dims': ()}
 
     def set_PbOpt(self):
+        # From Behrenfeld and Falkowski (1997)
+        
         depth_resolved_temperature = self.variables.get('temperature_depth_resolved', {}).get('value')
         surface_temperature = self.variables.get('surface_temperature', {}).get('value')
 

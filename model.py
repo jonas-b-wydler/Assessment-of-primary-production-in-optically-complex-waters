@@ -56,7 +56,7 @@ class depth_resolved_pp_model(BaseModel):
         self.ap = np.trapz(self.ap_z, x=self.depths, axis=0)
 
     def set_upwelling_correction_A(self):
-
+        # From Westberry and Siegel (2003) and Silsbe et al. (2016)
         self.eu = 1.4
 
         self.e_tz = self.e_tz *  self.eu
@@ -66,10 +66,10 @@ class depth_resolved_pp_model(BaseModel):
     
         
     def set_upwelling_correction_B(self, chl_a_surface, kd_par):
-
-        c_1 = 1.32 * (kd_par ** 0.153)                                               # Eq. 4: from Arst et al. (2012)
-        c_2 = (0.0023 * chl_a_surface) + 0.016                                       # Eq. 5: from Arst et al. (2012)
-        eu = c_1 * np.exp(c_2 * self.depths)                                         # Eq. 3: correction factor between scalar and planar PAR
+        # From Arst et al. (2008) and Arst et al. (2012)
+        c_1 = 1.32 * (kd_par ** 0.153)                                               
+        c_2 = (0.0023 * chl_a_surface) + 0.016                                       
+        eu = c_1 * np.exp(c_2 * self.depths)                                         
         self.eu = eu
         
         self.e_tz = self.eu[:, np.newaxis] * self.e_tz 
@@ -87,6 +87,7 @@ class depth_resolved_pp_model(BaseModel):
 
 
 class lee_like_model(depth_resolved_pp_model):
+    # From Arst et al. (2008) and Arst et al. (2012)
     def __init__(self, zeu=10, name='lee_like_model', zlim=30, correction_method='A', vert_uni=False, **kwargs):
         super().__init__(zeu=zeu, zlim=zlim, correction_method=correction_method, vert_uni=vert_uni)
         self.name = name
@@ -118,12 +119,16 @@ class lee_like_model(depth_resolved_pp_model):
 
 
 class arst_like_model(depth_resolved_pp_model):
+        # From Arst et al. (2008) and Arst et al. (2012)
+
     def __init__(self, zeu=10, name='arst_like_model', zlim=30, correction_method='A', vert_uni=False, **kwargs):
         super().__init__(zeu=zeu, zlim=zlim, correction_method=correction_method, vert_uni=vert_uni)
         self.name = name
         self.variables = {'m_depth_resolved': {'value': None, 'dims': ('depth', 'time')}}
 
     def calculate_M_depth_resolved_integral(self, chl_a_surface, chl_a_depth_resolved, chla_and_a_phy_depths, par_hourly_wavelength, kd_par):
+        # From Arst et al. (2008) and Arst et al. (2012)
+
         m_depth_resolved = np.zeros((len(self.depths), len(self.hour)))
         interpolated_values = self.interpolate_to_fixed_grid(chla_and_a_phy_depths, chl_a_depth_resolved)
         interpolated_values_2 = np.squeeze(interpolated_values)
@@ -147,6 +152,8 @@ class arst_like_model(depth_resolved_pp_model):
         self.variables['m_depth_resolved']['value'] = m_depth_resolved
 
     def quantum_yield_B(self, chl_a_surface, chl_a_depth_resolved, chla_and_a_phy_depths, par_noon, par_hourly_wavelength, kd_par):
+        # From Arst et al. (2008) and Arst et al. (2012)
+
         self.calculate_M_depth_resolved_integral(chl_a_surface, chl_a_depth_resolved, chla_and_a_phy_depths, par_hourly_wavelength, kd_par)
         f_par = 0.08 / ((1 + (self.variables['m_depth_resolved']['value'] * self.e_tz)) ** 1.5)
         self.f_par = f_par
@@ -178,6 +185,7 @@ class arst_like_model(depth_resolved_pp_model):
 
 
 class cafe_like_model(depth_resolved_pp_model):
+    # From Sislbe et al. 2016
     def __init__(self, zeu=10, name='cafe_like_model', zlim=30, correction_method='A', vert_uni=False, **kwargs):
         super().__init__(zeu=zeu, zlim=zlim, correction_method=correction_method, vert_uni=vert_uni)
         self.name = name
@@ -187,6 +195,8 @@ class cafe_like_model(depth_resolved_pp_model):
         self.e_tzw = np.zeros((len(self.depths), len(self.hour)))
 
     def quantum_yield_C(self, chla_and_a_phy_depths, a_phy_depth_resolved, a_phy_surface, par_noon, kd, kd_par, zeu, dl, par_hourly_wavelength, par):
+        # From Sislbe et al. 2016
+
         input_depths = chla_and_a_phy_depths
         input_values = a_phy_depth_resolved
         a_phy_interpolated = self.interpolate_to_fixed_grid(input_depths, input_values)
@@ -205,6 +215,8 @@ class cafe_like_model(depth_resolved_pp_model):
         self.phimax[self.phimax > phirange[1]] = phirange[1]
 
     def calculate_pp(self, chl_a_surface, a_phy_depth_resolved, a_phy_surface, par_noon, par, par_hourly, par_wavelength, kd, kds, kd_par, zeu, dl, par_hourly_wavelength, chla_and_a_phy_depths):
+        # From Sislbe et al. 2016
+
         if self.vert_uni:
             a_phy_depth_resolved = np.full_like(a_phy_depth_resolved, a_phy_surface)
 
@@ -230,6 +242,7 @@ class cafe_like_model(depth_resolved_pp_model):
 
 
 class vgpm_depth_resolved(depth_resolved_pp_model):
+    # From Behrenfeld and Falkowski (1996) and Lee and Mara et al. (2022)
     def __init__(self, zeu=10, name='vgpm_depth_resolved', zlim=30, correction_method='A', vert_uni=False, **kwargs):
         super().__init__(zeu=zeu, zlim=zlim, correction_method=correction_method, vert_uni=vert_uni)
         self.name = name
@@ -274,6 +287,7 @@ class vgpm_depth_resolved(depth_resolved_pp_model):
 
 
 class vgpm_model(BaseModel):
+    # From Behrenfeld and Falkowski (1996)
     def __init__(self, zeu=10, **kwargs):
         super().__init__('vgpm_model')
         self.model_pp = 0

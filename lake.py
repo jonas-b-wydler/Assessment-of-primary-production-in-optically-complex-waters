@@ -138,23 +138,7 @@ class depth_resolved_lake(Lake):
                 save_plot(fig, lake_name=self.name, title=plot_filename, subfolder=model_subfolder)
                 plt.close(fig)
 
-    def classify_stations(self, pattern_thresh=0.8, mape_thresh=25):
-        for station in self.stations:
-            for model in station.models:
-                if model.mape is None or model.pattern_correlation is None:
-                    model.case = None
-                else:
-                    if model.mape > 500 or model.pattern_correlation < 0:
-                        model.case = 5
-                    else:
-                        if model.pattern_correlation >= pattern_thresh and model.mape < mape_thresh:
-                            model.case = 1
-                        elif model.pattern_correlation >= pattern_thresh and model.mape >= mape_thresh:
-                            model.case = 3
-                        elif model.pattern_correlation < pattern_thresh and model.mape < mape_thresh:
-                            model.case = 2
-                        else:
-                            model.case = 4
+    
 
     def reset_outliers(self):
         for station in self.stations:
